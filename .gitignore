@@ -1,0 +1,7 @@
+# Binarios ejecutables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
