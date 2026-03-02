@@ -1,7 +1,61 @@
-# Binarios ejecutables
+# Go
 *.exe
-*.exe~
 *.dll
 *.so
 *.dylib
-bin/
+*.o
+*.a
+*.out
+
+# Binaries
+/bin
+/dist
+*.exe
+*.exe~
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.iml
+.DS_Store
+
+# Testing
+coverage.out
+coverage.html
+*.test
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Databases
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/
+
+# Temporary
+tmp/
+temp/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Build artifacts
+build/
+dist/
+release/

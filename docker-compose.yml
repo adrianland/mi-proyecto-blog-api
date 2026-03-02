@@ -1,6 +1,65 @@
 version: '3.8'
 services:
-  app:
-    build: .
+  # Servicio MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: blog_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "8080:8080"
+      - "${DB_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${DB_USER}", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - blog_network
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    security_opt:
+      - seccomp:unconfined
+
+  # Servicio API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blog_api
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SERVER_ENV: ${SERVER_ENV}
+      DB_HOST: mysql
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      # ... resto de tus variables
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}" # Mapeo correcto de puertos
+    networks:
+      - blog_network
+    # Healthcheck simplificado apuntando a la variable correcta
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${SERVER_PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  blog_network:
+    driver: bridge
